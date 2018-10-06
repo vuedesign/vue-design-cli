@@ -1,0 +1,9 @@
+{
+    "name": "templates",
+    "version": "1.0.0",
+    "default": "vued-template",
+    "list": [{
+        "name": "vued-template",
+        "description": "project"
+    }]
+}
