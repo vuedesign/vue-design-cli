@@ -14,17 +14,16 @@ class CliInit {
             CWD_PATH: this.options.CWD_PATH
         };
         Object.assign(this.DIR, {
-            DEFAULT_TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/templates`,
+            BASE_TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/templates`,
             TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/apps/cli_init/templates`
         });
-        this.templateConfigFile = `${this.DIR.DEFAULT_TEMPLATES_PATH}/config.json`;
+        this.templateConfigFile = `${this.DIR.BASE_TEMPLATES_PATH}/config.json`;
         this.templateConfig = this.getTemplateConfig(this.templateConfigFile);
-        this.init();
     }
 
-    async init() {
+    async init(projectName) {
         await this.downloadTemplate();
-        await this.copyDefaultTemplate();
+        await this.copyDefaultTemplate(projectName);
     }
 
     getTemplateConfig(templateConfigFile) {
@@ -53,9 +52,10 @@ class CliInit {
         });
     }
 
-    async downloadTemplate() {
-        const templatesPath = this.DIR.DEFAULT_TEMPLATES_PATH;
-        const templateGitUrl = 'https://github.com/vuedesign/vued-template.git';
+    async downloadTemplate(baseTemplateUrl, isDefault) {
+        const templatesPath = this.DIR.BASE_TEMPLATES_PATH;
+        const templateGitUrl = baseTemplateUrl || 'https://github.com/vuedesign/vued-template.git';
+        const templateName = (templateGitUrl.split('/').pop()).replace('.git', '');
         if (!shell.which('git')) {
             shell.echo('Sorry, this script requires git');
             shell.exit(1);
@@ -70,7 +70,7 @@ class CliInit {
             spinner.stop();
             if (code === 0) {
                 await this.addToConfig({
-                    "name": "vued-template",
+                    "name": templateName,
                     "description": "project"
                 });
                 console.log(`        clone success!`);
@@ -82,8 +82,7 @@ class CliInit {
         }
     }
 
-    copyDefaultTemplate() {
-        const projectName = this.options.projectName;
+    copyDefaultTemplate(projectName) {
         const srcDir = `../../templates/${this.templateConfig.default}`;
         const targetDir = `${this.DIR.CWD_PATH}/${projectName}`;
         return new Promise((resolve, reject) => {
