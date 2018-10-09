@@ -5,5 +5,8 @@
     "list": [{
         "name": "vued-template",
         "description": "project"
+    }, {
+        "name": "vuex",
+        "description": "project"
     }]
 }

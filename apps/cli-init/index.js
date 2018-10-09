@@ -3,7 +3,7 @@ const Metalsmith = require('metalsmith');
 const debug = require('metalsmith-debug');
 const shell = require('shelljs');
 const ora = require('ora');
-const beautify = require('./beautify');
+const beautify = require('../../global/utils/beautify');
 const fs = require('../../global/utils/fs');
 
 class CliInit {
@@ -15,7 +15,7 @@ class CliInit {
         };
         Object.assign(this.DIR, {
             BASE_TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/templates`,
-            TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/apps/cli_init/templates`
+            TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/apps/cli-init/templates`
         });
         this.templateConfigFile = `${this.DIR.BASE_TEMPLATES_PATH}/config.json`;
         this.templateConfig = this.getTemplateConfig(this.templateConfigFile);
@@ -93,8 +93,9 @@ class CliInit {
                 .use(filtersPlugin({
                     templatePath: this.DIR.TEMPLATES_PATH
                 }))
-                .build(function (err) {
+                .build(err => {
                     if (err) {
+                        console.log('Build failure!');
                         reject(new Error(err));
                     } else {
                         console.log('Build finished!');
@@ -106,7 +107,7 @@ class CliInit {
 }
 
 function filtersPlugin(options = {}) {
-    let templateName = options.templateName || 'default';
+    let templateName = options.templateName || 'base';
     let templatePath = options.templatePath;
     return (files, metalsmith, done) => {
         setImmediate(done);
@@ -116,7 +117,7 @@ function filtersPlugin(options = {}) {
             let filename = file.replace(extname, extname.replace('.', '_'));
             let templateContent = null;
             try {
-                templateContent = require(`${templatePath}/${templateName}/${filename}.js`)(options);
+                templateContent = require(`${templatePath}/vued-template/${templateName}/${filename}.js`)(options);
             } catch (e) {
                 templateContent = null;
             }
