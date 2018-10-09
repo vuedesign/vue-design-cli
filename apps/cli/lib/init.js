@@ -25,7 +25,7 @@ class Init {
     }
 
     copyDefaultTemplate(projectName) {
-        const srcDir = `../../templates/${this.baseTemplate.config.default}`;
+        const srcDir = `../../../templates/${this.baseTemplate.config.default}`;
         const targetDir = `${this.DIR.CWD_PATH}/${projectName}`;
         return new Promise((resolve, reject) => {
             Metalsmith(__dirname)

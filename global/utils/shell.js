@@ -20,3 +20,11 @@ module.exports.exit = (num) => {
 module.exports.which = (name) => {
     return shell.which(name);
 };
+
+module.exports.cd = (templatesPath) => {
+    shell.cd(templatesPath);
+};
+
+module.exports.echo = (content) => {
+    shell.echo(content);
+};

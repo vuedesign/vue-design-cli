@@ -3,12 +3,16 @@
 const path = require('path');
 const colors = require('colors');
 const program = require('commander');
-const cli = require('../apps/cli');
+const Init = require('../apps/cli/lib/init');
+const BaseTemplate = require('../apps/cli/lib/baseTemplate');
 
 const options = {
     ROOT_PATH: path.join(__dirname, '..'),
     CWD_PATH: process.cwd()
 };
+
+const init = new Init(options);
+const baseTemplate = new BaseTemplate(options);
 
 program
     .version(require('../package').version)
@@ -19,7 +23,7 @@ program
     .description('init project')
     .action((projectName, cmd) => {
         if (projectName) {
-            cli.init(Object.assign({}, options, {
+            init.init(Object.assign({}, options, {
                 projectName
             }));
         } else {
@@ -27,15 +31,26 @@ program
         }
     });
 
-program.command('add <command> <base-template-url>')
+program.command('bt-add <base-template-url>')
     .option('-d, --default', 'set default base template')
-    .action((command, baseTemplateUrl, cmd) => {
+    .action((baseTemplateUrl, cmd) => {
         console.log('cmd', cmd.default);
-        if (command === 'bt' && baseTemplateUrl) {
-            cli.add(Object.assign({}, options, {
+        if (baseTemplateUrl) {
+            baseTemplate.add({
                 baseTemplateUrl,
-                default: cmd.default
-            }));
+                isDefault: cmd.default
+            });
+        } else {
+            program.outputHelp(make_red);
+        }
+    });
+
+program.command('bt-del <template-name>')
+    .action((templateName, cmd) => {
+        if (templateName) {
+            baseTemplate.del({
+                templateName
+            });
         } else {
             program.outputHelp(make_red);
         }

@@ -1,6 +1,9 @@
 const fs = require('fs');
+const del = require('del');
 
-
+module.exports.del = (arr, options = {}) => {
+    return del(arr, options);
+};
 
 module.exports.writeFile = (file, data) => {
     return new Promise((resolve, reject) => {

@@ -1,5 +1,7 @@
+const ora = require('ora');
+const colors = require('colors');
 const fs = require('../../../global/utils/fs');
-const shell = require('../../../global/utils');
+const shell = require('../../../global/utils/shell');
 const beautify = require('../../../global/utils/beautify');
 
 class BaseTemplate {
@@ -16,14 +18,47 @@ class BaseTemplate {
         this.config = this.getConfig(this.configFile);
     }
 
+    async add({ baseTemplateUrl, isDefault }) {
+        await this.download(baseTemplateUrl, isDefault);
+    }
+
+    async del({ templateName }) {
+        if (this.isTemplate(templateName)) {
+            await fs.del([`${this.DIR.BASE_TEMPLATES_PATH}/${templateName}/**`], {
+                force: true
+            });
+            let templateConfig = Object.assign({}, this.config);
+            const index = templateConfig.list.findIndex(item => item.name === templateName);
+            templateConfig.list.splice(index, 1);
+            await this.update(templateConfig);
+            console.log(colors.green(`del ${templateName} template success!`));
+        }
+    }
+
     getConfig(configFile) {
         return require(configFile);
+    }
+
+    isTemplate(templateName) {
+        if (this.config.list.length > 0) {
+            let list = this.config.list.find(item => item.name === templateName);
+            if (!list) {
+                return false
+            } else {
+                return true
+            }
+        } else {
+            return false
+        }
     }
 
     async download(baseTemplateUrl, isDefault) {
         const templatesPath = this.DIR.BASE_TEMPLATES_PATH;
         const templateGitUrl = baseTemplateUrl || 'https://github.com/vuedesign/vued-template.git';
         const templateName = (templateGitUrl.split('/').pop()).replace('.git', '');
+        if (this.isTemplate(templateName)) {
+            return false
+        }
         if (!shell.which('git')) {
             shell.echo('Sorry, this script requires git');
             shell.exit(1);
@@ -37,7 +72,7 @@ class BaseTemplate {
             const { code } = await shell.exec(`git clone ${templateGitUrl}`);
             spinner.stop();
             if (code === 0) {
-                await this.addToConfig({
+                await this.addConfig({
                     "name": templateName,
                     "description": "project"
                 });
@@ -50,13 +85,16 @@ class BaseTemplate {
         }
     }
 
-    addToConfig(item) {
-        let templateConfig = Object.assign({}, this.config);
-        templateConfig.list.push(item);
+    async update(templateConfig) {
         const data = JSON.stringify(templateConfig);
         const beautifyData = beautify(data, 'js');
-        console.log(beautifyData);
-        return fs.writeFile(this.configFile, beautifyData)
+        await fs.writeFile(this.configFile, beautifyData)
+    }
+
+    async addConfig(item) {
+        let templateConfig = Object.assign({}, this.config);
+        templateConfig.list.push(item);
+        await this.update(templateConfig);
     }
 }
 
