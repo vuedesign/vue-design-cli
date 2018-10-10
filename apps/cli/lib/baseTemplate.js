@@ -1,8 +1,10 @@
 const ora = require('ora');
 const colors = require('colors');
+const inquirer = require('inquirer');
 const fs = require('../../../global/utils/fs');
 const shell = require('../../../global/utils/shell');
 const beautify = require('../../../global/utils/beautify');
+const utils = require('../../../global/utils/utils');
 
 class BaseTemplate {
     constructor(options = {}) {
@@ -33,6 +35,23 @@ class BaseTemplate {
             await this.update(templateConfig);
             console.log(colors.green(`del ${templateName} template success!`));
         }
+    }
+
+    async set() {
+        const questions = [
+            {
+                type: 'list',
+                name: 'btName',
+                message: 'Please set default base template.',
+                choices: utils.arrayO2I(this.config.list, 'name'),
+                default: this.config.current
+            }
+        ];
+        let templateConfig = Object.assign({}, this.config);
+        const { btName } = await inquirer.prompt(questions);
+        templateConfig.current = btName;
+        await this.update(templateConfig);
+        console.log(colors.green('Set default base template success!'));
     }
 
     getConfig(configFile) {

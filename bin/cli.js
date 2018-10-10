@@ -56,7 +56,17 @@ program.command('bt-del <template-name>')
         }
     });
 
+program.command('bt-set')
+    .action((cmd) => {
+        baseTemplate.set();
+        // console.log('cmd', cmd);
+    });
+
 program.parse(process.argv);
+
+if (program.args.length === 0) {
+    program.help();
+}
 
 function make_red(txt) {
     return colors.red(txt); // display the help text in red on the console
