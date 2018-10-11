@@ -15,17 +15,23 @@ class Init {
         };
         Object.assign(this.DIR, {
             BASE_TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/templates`,
-            TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/apps/cli-init/templates`
+            TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/apps/cli/templates`
         });
+        this.baseTemplateConfig = this.baseTemplate.config;
+        this.templateConfig = this.getTemplateConfig(`${this.DIR.TEMPLATES_PATH}/${this.baseTemplateConfig.current}/config.json`);
     }
 
-    async init(projectName) {
+    getTemplateConfig(templateFile) {
+        return require(templateFile);
+    }
+
+    async init({ projectName }) {
         await this.baseTemplate.download();
         await this.copyDefaultTemplate(projectName);
     }
 
     copyDefaultTemplate(projectName) {
-        const srcDir = `../../../templates/${this.baseTemplate.config.current}`;
+        const srcDir = `../../../templates/${this.baseTemplateConfig.current}`;
         const targetDir = `${this.DIR.CWD_PATH}/${projectName}`;
         return new Promise((resolve, reject) => {
             Metalsmith(__dirname)
@@ -33,7 +39,9 @@ class Init {
                 .destination(targetDir)
                 .use(debug())
                 .use(filtersPlugin({
-                    templatePath: this.DIR.TEMPLATES_PATH
+                    templatePath: this.DIR.TEMPLATES_PATH,
+                    templateName: this.templateConfig.current,
+                    baseTemplateName: this.baseTemplateConfig.current
                 }))
                 .build(err => {
                     if (err) {
@@ -50,30 +58,38 @@ class Init {
 
 function filtersPlugin(options = {}) {
     let templateName = options.templateName || 'base';
+    let baseTemplateName = options.baseTemplateName || 'vued-template';
     let templatePath = options.templatePath;
     return (files, metalsmith, done) => {
         setImmediate(done);
         Object.keys(files).forEach(file => {
-            let data = files[file];
-            let extname = path.extname(file);
-            let filename = file.replace(extname, extname.replace('.', '_'));
-            let templateContent = null;
-            try {
-                templateContent = require(`${templatePath}/vued-template/${templateName}/${filename}.js`)(options);
-            } catch (e) {
-                templateContent = null;
-            }
-            if (templateContent) {
-                templateContent = beautify(templateContent, 'js');
-                try {
-                    // preferred
-                    data.contents = Buffer.from(templateContent);
-                } catch (err) {
-                    // node versions < (5.10 | 6)
-                    data.contents = new Buffer(templateContent);
+            if (!(file.indexOf('.git/') > -1)) {
+                let newFile = file;
+                let data = files[file];
+                let extname = path.extname(newFile);
+                if (extname) {
+                    newFile = newFile.replace(extname, extname.replace('.', '_'));
+                } else {
+                    newFile = newFile.replace('.', '_');
                 }
-                delete files[file];
-                files[file] = data;
+                let templateContent = null;
+                try {
+                    templateContent = require(`${templatePath}/${baseTemplateName}/${templateName}/${newFile}.js`)(options);
+                } catch (e) {
+                    templateContent = null;
+                }
+                if (templateContent) {
+                    templateContent = beautify(templateContent, 'js');
+                    try {
+                        // preferred
+                        data.contents = Buffer.from(templateContent);
+                    } catch (err) {
+                        // node versions < (5.10 | 6)
+                        data.contents = new Buffer(templateContent);
+                    }
+                    delete files[file];
+                    files[file] = data;
+                }
             }
         });
     };

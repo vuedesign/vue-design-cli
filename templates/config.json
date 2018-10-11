@@ -1,7 +1,7 @@
 {
     "name": "templates",
     "version": "1.0.0",
-    "current": "vue-router",
+    "current": "vued-template",
     "list": [{
         "name": "vued-template",
         "description": "project"
