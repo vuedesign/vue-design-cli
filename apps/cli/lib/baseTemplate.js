@@ -62,12 +62,12 @@ class BaseTemplate {
         if (this.config.list.length > 0) {
             let list = this.config.list.find(item => item.name === templateName);
             if (!list) {
-                return false
+                return false;
             } else {
-                return true
+                return true;
             }
         } else {
-            return false
+            return false;
         }
     }
 
@@ -76,7 +76,7 @@ class BaseTemplate {
         const templateGitUrl = baseTemplateUrl || 'https://github.com/vuedesign/vued-template.git';
         const templateName = (templateGitUrl.split('/').pop()).replace('.git', '');
         if (this.isTemplate(templateName)) {
-            return false
+            return false;
         }
         if (!shell.which('git')) {
             shell.echo('Sorry, this script requires git');
@@ -92,8 +92,8 @@ class BaseTemplate {
             spinner.stop();
             if (code === 0) {
                 await this.addConfig({
-                    "name": templateName,
-                    "description": "project"
+                    name: templateName,
+                    description: 'project'
                 });
                 console.log(`        clone success!`);
             } else {
@@ -107,7 +107,7 @@ class BaseTemplate {
     async update(templateConfig) {
         const data = JSON.stringify(templateConfig);
         const beautifyData = beautify(data, 'js');
-        await fs.writeFile(this.configFile, beautifyData)
+        await fs.writeFile(this.configFile, beautifyData);
     }
 
     async addConfig(item) {
@@ -117,4 +117,4 @@ class BaseTemplate {
     }
 }
 
-module.exports= BaseTemplate;
+module.exports = BaseTemplate;

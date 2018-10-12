@@ -16,7 +16,7 @@ const baseTemplate = new BaseTemplate(options);
 
 program
     .version(require('../package').version)
-    .usage('<command> [options]')
+    .usage('<command> [options]');
 
 program
     .command('init <project-name>')
@@ -27,7 +27,7 @@ program
                 projectName
             }));
         } else {
-            program.outputHelp(make_red);
+            program.outputHelp(makeRed);
         }
     });
 
@@ -41,7 +41,7 @@ program.command('bt-add <base-template-url>')
                 isDefault: cmd.default
             });
         } else {
-            program.outputHelp(make_red);
+            program.outputHelp(makeRed);
         }
     });
 
@@ -52,7 +52,7 @@ program.command('bt-del <template-name>')
                 templateName
             });
         } else {
-            program.outputHelp(make_red);
+            program.outputHelp(makeRed);
         }
     });
 
@@ -68,6 +68,6 @@ if (program.args.length === 0) {
     program.help();
 }
 
-function make_red(txt) {
+function makeRed(txt) {
     return colors.red(txt); // display the help text in red on the console
 }

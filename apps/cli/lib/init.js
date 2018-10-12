@@ -1,8 +1,8 @@
 const path = require('path');
 const Metalsmith = require('metalsmith');
 const debug = require('metalsmith-debug');
-const ora = require('ora');
 const beautify = require('../../../global/utils/beautify');
+const fs = require('../../../global/utils/fs');
 const BaseTemplate = require('./baseTemplate');
 
 class Init {
@@ -72,24 +72,18 @@ function filtersPlugin(options = {}) {
                 } else {
                     newFile = newFile.replace('.', '_');
                 }
-                let templateContent = null;
-                try {
-                    templateContent = require(`${templatePath}/${baseTemplateName}/${templateName}/${newFile}.js`)(options);
-                } catch (e) {
-                    templateContent = null;
-                }
-                if (templateContent) {
-                    templateContent = beautify(templateContent, 'js');
-                    try {
-                        // preferred
-                        data.contents = Buffer.from(templateContent);
-                    } catch (err) {
-                        // node versions < (5.10 | 6)
-                        data.contents = new Buffer(templateContent);
+                let filePath = `${templatePath}/${baseTemplateName}/${templateName}/files/${newFile}.js`;
+                fs.access(filePath).then((access) => {
+                    if (access) {
+                        let templateContent = require(filePath)(options);
+                        if (templateContent) {
+                            templateContent = beautify(templateContent, 'js');
+                            data.contents = Buffer.from(templateContent);
+                            delete files[file];
+                            files[file] = data;
+                        }
                     }
-                    delete files[file];
-                    files[file] = data;
-                }
+                });
             }
         });
     };

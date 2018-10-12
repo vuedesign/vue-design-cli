@@ -19,3 +19,19 @@ module.exports.writeFile = (file, data) => {
         });
     });
 };
+
+module.exports.access = (path) => {
+    return new Promise((resolve, reject) => {
+        if (path) {
+            fs.access(path, err => {
+                if (err.code === 'ENOENT') {
+                    reject(new Error(err));
+                } else {
+                    resolve(true);
+                }
+            });
+        } else {
+            reject(new Error({ err: 'Not found path' }));
+        }
+    });
+};

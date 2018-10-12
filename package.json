@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "rmm": "rm -rf ./templates/project/node_modules"
+    "rmm": "rm -rf ./templates/project/node_modules",
+    "lint": "nodemon --exec 'eslint --ext .js,.json .' ."
   },
   "bin": {
     "vued": "./bin/cli.js"
@@ -29,5 +30,14 @@
     "metalsmith-debug": "^1.2.0",
     "ora": "^3.0.0",
     "shelljs": "^0.8.2"
+  },
+  "devDependencies": {
+    "eslint": "^4.15.0",
+    "eslint-config-airbnb-base": "^11.3.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1"
   }
 }
