@@ -1,5 +1,6 @@
 const fs = require('fs');
 const del = require('del');
+const glob = require('glob');
 
 module.exports.del = (arr, options = {}) => {
     return del(arr, options);
@@ -35,3 +36,29 @@ module.exports.access = (path) => {
         }
     });
 };
+
+module.exports.glob = (str, options = {}) => {
+    return new Promise((resolve, reject) => {
+        glob(str, options, function (er, files) {
+            if (er) {
+                reject(new Error(er));
+            } else {
+                resolve(files);
+            }
+        })
+    });
+};
+
+module.exports.isDirectory = (path) => {
+    return new Promise((resolve, reject) => {
+        fs.stat(path, (err, stat) => {
+            if (err) {
+                reject(new Error(err));
+            } else {
+                resolve(stat.isDirectory());
+            }
+        });
+    });
+};
+
+

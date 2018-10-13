@@ -5,6 +5,7 @@ const colors = require('colors');
 const program = require('commander');
 const Init = require('../apps/cli/lib/init');
 const BaseTemplate = require('../apps/cli/lib/baseTemplate');
+const buildBaseTemplateMapJson = require('../global/tools/buildBaseTemplateMapJson');
 
 const options = {
     ROOT_PATH: path.join(__dirname, '..'),
@@ -60,6 +61,22 @@ program.command('bt-set')
     .action((cmd) => {
         baseTemplate.set();
         // console.log('cmd', cmd);
+    });
+
+program
+    .command('bt-map')
+    .option('-w, --workspace [value]', 'set workspace path')
+    .option('-p, --projectName [value]', 'set project name')
+    .option('-m, --mapPath [value]', 'set map path')
+    .option('-i, --ignore [value]', 'set ignore files')
+    .action((cmd) => {
+        const config = {
+            workspace: cmd.workspace,
+            projectName: cmd.projectName,
+            mapPath: cmd.mapPath,
+            ignore: JSON.parse(cmd.ignore) || []
+        };
+        buildBaseTemplateMapJson(config);
     });
 
 program.parse(process.argv);
