@@ -1,8 +1,7 @@
-const path = require('path');
 const Metalsmith = require('metalsmith');
 const debug = require('metalsmith-debug');
-const beautify = require('../../../global/utils/beautify');
-const fs = require('../../../global/utils/fs');
+const inquirer = require('inquirer');
+const template = require('./metalsmith-template');
 const BaseTemplate = require('./baseTemplate');
 
 class Init {
@@ -18,31 +17,48 @@ class Init {
             TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/apps/cli/templates`
         });
         this.baseTemplateConfig = this.baseTemplate.config;
-        this.templateConfig = this.getTemplateConfig(`${this.DIR.TEMPLATES_PATH}/${this.baseTemplateConfig.current}/config.json`);
+        this.templateConfig = this.getTemplateConfig(`${this.DIR.TEMPLATES_PATH}/config.json`);
+        this.inquirerConfig = this.getInquirerConfig(`${this.DIR.TEMPLATES_PATH}/${this.templateConfig.current}/prompt.json`);
     }
 
+    getTemplatePrompt(inquirerConfig) {
+        return inquirer.prompt(inquirerConfig);
+    };
+
+    getInquirerConfig(promptFile) {
+        return require(promptFile);
+    }
+
+    /**
+     * 获取模板的配置
+     * @param templateFile
+     * @returns {*}
+     */
     getTemplateConfig(templateFile) {
         return require(templateFile);
     }
 
     async init({ projectName }) {
         await this.baseTemplate.download();
-        await this.copyDefaultTemplate(projectName);
+        const answers = await this.getTemplatePrompt(this.inquirerConfig);
+        console.log('options', answers);
+        await this.copyDefaultTemplate(Object.assign({}, answers, {
+            projectName
+        }));
     }
 
-    copyDefaultTemplate(projectName) {
+    copyDefaultTemplate(options = {}) {
         const srcDir = `../../../templates/${this.baseTemplateConfig.current}`;
-        const targetDir = `${this.DIR.CWD_PATH}/${projectName}`;
+        const targetDir = `${this.DIR.CWD_PATH}/${options.projectName}`;
         return new Promise((resolve, reject) => {
             Metalsmith(__dirname)
                 .source(srcDir)
                 .destination(targetDir)
                 .use(debug())
-                .use(filtersPlugin({
+                .use(template(Object.assign({}, options, {
                     templatePath: this.DIR.TEMPLATES_PATH,
-                    templateName: this.templateConfig.current,
-                    baseTemplateName: this.baseTemplateConfig.current
-                }))
+                    templateName: this.templateConfig.current
+                })))
                 .build(err => {
                     if (err) {
                         console.log('Build failure!');
@@ -54,39 +70,6 @@ class Init {
                 });
         });
     }
-}
-
-function filtersPlugin(options = {}) {
-    let templateName = options.templateName || 'base';
-    let baseTemplateName = options.baseTemplateName || 'vued-template';
-    let templatePath = options.templatePath;
-    return (files, metalsmith, done) => {
-        setImmediate(done);
-        Object.keys(files).forEach(file => {
-            if (!(file.indexOf('.git/') > -1)) {
-                let newFile = file;
-                let data = files[file];
-                let extname = path.extname(newFile);
-                if (extname) {
-                    newFile = newFile.replace(extname, extname.replace('.', '_'));
-                } else {
-                    newFile = newFile.replace('.', '_');
-                }
-                let filePath = `${templatePath}/${baseTemplateName}/${templateName}/files/${newFile}.js`;
-                fs.access(filePath).then((access) => {
-                    if (access) {
-                        let templateContent = require(filePath)(options);
-                        if (templateContent) {
-                            templateContent = beautify(templateContent, 'js');
-                            data.contents = Buffer.from(templateContent);
-                            delete files[file];
-                            files[file] = data;
-                        }
-                    }
-                });
-            }
-        });
-    };
 }
 
 module.exports = Init;
