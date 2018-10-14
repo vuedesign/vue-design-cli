@@ -3,44 +3,91 @@
 const path = require('path');
 const colors = require('colors');
 const program = require('commander');
-const CliInit = require('../apps/cli_init');
-console.log('==== run ', require('../package').version);
+const Init = require('../apps/cli/lib/init');
+const BaseTemplate = require('../apps/cli/lib/baseTemplate');
+const buildBaseTemplateMapJson = require('../global/tools/buildBaseTemplateMapJson');
+const utils = require('../global/utils/utils');
 
-const cliInit = new CliInit({
+const options = {
     ROOT_PATH: path.join(__dirname, '..'),
     CWD_PATH: process.cwd()
-});
+};
+
+const init = new Init(options);
+const baseTemplate = new BaseTemplate(options);
 
 program
     .version(require('../package').version)
-    .usage('<command> [options]')
+    .usage('<command> [options]');
 
 program
     .command('init <project-name>')
     .description('init project')
-    // .option('-p, --preset <project-name>', 'Skip prompts and use saved or remote preset')
     .action((projectName, cmd) => {
         if (projectName) {
-            cliInit.init(projectName);
+            (async () => {
+                init.init(Object.assign({}, options, {
+                    projectName
+                }));
+            })();
         } else {
-            program.outputHelp(make_red);
+            program.outputHelp(makeRed);
         }
     });
 
-program.command('add <command> <base-template-url>')
+program.command('bt-add <base-template-url>')
     .option('-d, --default', 'set default base template')
-    .action((command, baseTemplateUrl, cmd) => {
+    .action((baseTemplateUrl, cmd) => {
         console.log('cmd', cmd.default);
-        if (command === 'bt' && baseTemplateUrl) {
-            cliInit.downloadTemplate(baseTemplateUrl);
+        if (baseTemplateUrl) {
+            baseTemplate.add({
+                baseTemplateUrl,
+                isDefault: cmd.default
+            });
         } else {
-            program.outputHelp(make_red);
+            program.outputHelp(makeRed);
         }
+    });
+
+program.command('bt-del <template-name>')
+    .action((templateName, cmd) => {
+        if (templateName) {
+            baseTemplate.del({
+                templateName
+            });
+        } else {
+            program.outputHelp(makeRed);
+        }
+    });
+
+program.command('bt-set')
+    .action((cmd) => {
+        baseTemplate.set();
+        // console.log('cmd', cmd);
+    });
+
+program
+    .command('bt-map')
+    .option('-w, --workspace [value]', 'set workspace path')
+    .option('-p, --projectName [value]', 'set project name')
+    .option('-m, --mapPath [value]', 'set map path')
+    .option('-i, --ignore [value]', 'set ignore files')
+    .action((cmd) => {
+        const config = {
+            workspace: cmd.workspace,
+            projectName: cmd.projectName,
+            mapPath: cmd.mapPath,
+            ignore: JSON.parse(cmd.ignore) || []
+        };
+        buildBaseTemplateMapJson(config);
     });
 
 program.parse(process.argv);
 
-function make_red(txt) {
-    return colors.red(txt); //display the help text in red on the console
+if (program.args.length === 0) {
+    program.help();
 }
 
+function makeRed(txt) {
+    return colors.red(txt); // display the help text in red on the console
+}

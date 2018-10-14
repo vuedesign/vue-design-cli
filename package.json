@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "rmm": "rm -rf ./templates/project/node_modules"
+    "rmm": "rm -rf ./templates/project/node_modules",
+    "lint": "nodemon --exec 'eslint --ext .js,.json .' .",
+    "map": "vued bt-map -w /Users/wujian/Development/vue.design/vued-cli/templates -p vued-template -m /Users/wujian/Development/vue.design/vued-cli/apps/cli/templates/vued-template/base -i '[\".git\",\"mode_modules\"]'"
   },
   "bin": {
     "vued": "./bin/cli.js"
@@ -22,10 +24,22 @@
   "dependencies": {
     "colors": "^1.3.2",
     "commander": "^2.18.0",
+    "del": "^3.0.0",
+    "glob": "^7.1.3",
+    "inquirer": "^6.2.0",
     "js-beautify": "^1.8.6",
     "metalsmith": "^2.3.0",
     "metalsmith-debug": "^1.2.0",
     "ora": "^3.0.0",
     "shelljs": "^0.8.2"
+  },
+  "devDependencies": {
+    "eslint": "^4.15.0",
+    "eslint-config-airbnb-base": "^11.3.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1"
   }
 }
