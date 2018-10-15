@@ -23,11 +23,11 @@ class Init {
 
     getTemplatePrompt(inquirerConfig) {
         const config = [{
-            "type": "list",
-            "name": "templateName",
-            "message": "Please select template",
-            "choices": this.templateConfig.list,
-            "default": this.templateConfig.current
+            type: 'list',
+            name: 'templateName',
+            message: 'Please select template',
+            choices: this.templateConfig.list,
+            default: this.templateConfig.current
         }].concat(inquirerConfig);
         return inquirer.prompt(config);
     };

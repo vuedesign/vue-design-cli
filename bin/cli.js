@@ -6,7 +6,6 @@ const program = require('commander');
 const Init = require('../apps/cli/lib/init');
 const BaseTemplate = require('../apps/cli/lib/baseTemplate');
 const buildBaseTemplateMapJson = require('../global/tools/buildBaseTemplateMapJson');
-const utils = require('../global/utils/utils');
 
 const options = {
     ROOT_PATH: path.join(__dirname, '..'),
@@ -25,7 +24,7 @@ program
     .description('init project')
     .action((projectName, cmd) => {
         if (projectName) {
-            (async () => {
+            (async() => {
                 init.init(Object.assign({}, options, {
                     projectName
                 }));
