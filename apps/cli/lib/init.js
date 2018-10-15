@@ -22,7 +22,14 @@ class Init {
     }
 
     getTemplatePrompt(inquirerConfig) {
-        return inquirer.prompt(inquirerConfig);
+        const config = [{
+            "type": "list",
+            "name": "templateName",
+            "message": "Please select template",
+            "choices": this.templateConfig.list,
+            "default": this.templateConfig.current
+        }].concat(inquirerConfig);
+        return inquirer.prompt(config);
     };
 
     getInquirerConfig(promptFile) {
@@ -41,7 +48,6 @@ class Init {
     async init({ projectName }) {
         await this.baseTemplate.download();
         const answers = await this.getTemplatePrompt(this.inquirerConfig);
-        console.log('options', answers);
         await this.copyDefaultTemplate(Object.assign({}, answers, {
             projectName
         }));
@@ -56,8 +62,7 @@ class Init {
                 .destination(targetDir)
                 .use(debug())
                 .use(template(Object.assign({}, options, {
-                    templatePath: this.DIR.TEMPLATES_PATH,
-                    templateName: this.templateConfig.current
+                    templatePath: this.DIR.TEMPLATES_PATH
                 })))
                 .build(err => {
                     if (err) {
