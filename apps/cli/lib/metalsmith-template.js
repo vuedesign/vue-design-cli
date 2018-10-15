@@ -21,7 +21,10 @@ module.exports = (options = {}) => {
                 let filePath = `${templatePath}/${templateName}/files/${newFile}.js`;
                 fs.access(filePath).then((access) => {
                     if (access) {
-                        let templateContent = require(filePath)(options);
+                        // 在模板对象中注入母板内容Buffer
+                        let templateContent = require(filePath)(Object.assign({}, options, {
+                            contents: data.contents
+                        }));
                         if (templateContent) {
                             templateContent = beautify(templateContent, 'js');
                             data.contents = Buffer.from(templateContent);
