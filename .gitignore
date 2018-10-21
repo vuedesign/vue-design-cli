@@ -1,6 +1,6 @@
 .DS_Store
 node_modules/
-__templates__/
+__templates__/**/
 
 package-lock.json
 npm-debug.log*
