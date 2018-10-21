@@ -1,64 +1,72 @@
 const Metalsmith = require('metalsmith');
 const debug = require('metalsmith-debug');
 const inquirer = require('inquirer');
-const template = require('./metalsmith-template');
-const BaseTemplate = require('./baseTemplate');
+const app = require('./metalsmith-app');
+const Template = require('./template');
 
 class Init {
     constructor(options = {}) {
-        this.baseTemplate = new BaseTemplate(options);
         this.options = options;
-        this.DIR = {
-            ROOT_PATH: this.options.ROOT_PATH,
-            CWD_PATH: this.options.CWD_PATH
-        };
-        Object.assign(this.DIR, {
-            BASE_TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/templates`,
-            TEMPLATES_PATH: `${this.DIR.ROOT_PATH}/apps/cli/templates`
+        this.template = new Template(options);
+        this.templateConfig = this.template.config;
+        this.templateName = this.options.templateName || this.templateConfig.current;
+        // this.appPromptConfig = this.getAppPromptConfig();
+    }
+
+    getAppPath(templateName) {
+        const paths = [
+            this.options.TEMPLATES_PATH,
+            templateName,
+            '__templates__',
+            'apps'
+        ];
+        return paths.join('/');
+    }
+
+    async getAnswers() {
+        const config = [{
+            type: 'list',
+            name: 'appName',
+            message: 'Please select template',
+            choices: this.appConfig.list,
+            default: this.appConfig.current
+        }];
+        const { appName } = await inquirer.prompt(config);
+        const appPromptConfig = this.getAppPromptConfig(appName);
+        const answers = await inquirer.prompt(appPromptConfig);
+        return Object.assign({}, answers, {
+            appName
         });
-        this.baseTemplateConfig = this.baseTemplate.config;
-        this.templateConfig = this.getTemplateConfig(`${this.DIR.TEMPLATES_PATH}/config.json`);
-        this.inquirerConfig = this.getInquirerConfig(`${this.DIR.TEMPLATES_PATH}/${this.templateConfig.current}/prompt.json`);
     }
 
-    getTemplatePrompt(inquirerConfig) {
-        return inquirer.prompt(inquirerConfig);
-    };
-
-    getInquirerConfig(promptFile) {
-        return require(promptFile);
+    getAppPromptConfig(appName) {
+        return require(`${this.appPath}/${appName}/prompt.json`);
     }
 
-    /**
-     * 获取模板的配置
-     * @param templateFile
-     * @returns {*}
-     */
-    getTemplateConfig(templateFile) {
-        return require(templateFile);
-    }
-
-    async init({ projectName }) {
-        await this.baseTemplate.download();
-        const answers = await this.getTemplatePrompt(this.inquirerConfig);
-        console.log('options', answers);
-        await this.copyDefaultTemplate(Object.assign({}, answers, {
-            projectName
+    async init(options = {}) {
+        if (this.templateConfig.list.length === 0) {
+            await this.template.download();
+        }
+        this.appPath = this.getAppPath(this.templateName);
+        this.appConfigFile = `${this.appPath}/config.json`;
+        this.appConfig = require(this.appConfigFile);
+        const answers = await this.getAnswers();
+        await this.copyDefaultTemplate(Object.assign({}, this.options, options, answers, {
+            templateName: this.templateName,
+            templatePath: this.options.TEMPLATES_PATH,
+            appPath: this.appPath
         }));
     }
 
     copyDefaultTemplate(options = {}) {
-        const srcDir = `../../../templates/${this.baseTemplateConfig.current}`;
-        const targetDir = `${this.DIR.CWD_PATH}/${options.projectName}`;
+        const srcDir = `../../../__templates__/${options.templateName}`;
+        const targetDir = `${options.CWD_PATH}/${options.projectName}`;
         return new Promise((resolve, reject) => {
             Metalsmith(__dirname)
                 .source(srcDir)
                 .destination(targetDir)
                 .use(debug())
-                .use(template(Object.assign({}, options, {
-                    templatePath: this.DIR.TEMPLATES_PATH,
-                    templateName: this.templateConfig.current
-                })))
+                .use(app(options))
                 .build(err => {
                     if (err) {
                         console.log('Build failure!');

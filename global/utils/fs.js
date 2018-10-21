@@ -39,13 +39,13 @@ module.exports.access = (path) => {
 
 module.exports.glob = (str, options = {}) => {
     return new Promise((resolve, reject) => {
-        glob(str, options, function (er, files) {
+        glob(str, options, (er, files) => {
             if (er) {
                 reject(new Error(er));
             } else {
                 resolve(files);
             }
-        })
+        });
     });
 };
 
@@ -60,5 +60,3 @@ module.exports.isDirectory = (path) => {
         });
     });
 };
-
-

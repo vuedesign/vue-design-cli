@@ -1,7 +1,6 @@
-const path = require('path');
 const fs = require('../utils/fs');
 
-module.exports = async ({ workspace, projectName, mapPath, ignore }) => {
+module.exports = async({ workspace, projectName, mapPath, ignore }) => {
     console.time(projectName);
     let mapJson = await getMapItem(`${workspace}/${projectName}`, `/${projectName}/`, ignore);
     let mapJsonString = JSON.stringify(mapJson, null, 4);
@@ -19,7 +18,7 @@ async function getMapItem(path, splitString, ignore = []) {
         ignore
     });
     let mapList = [];
-    for(let file of files) {
+    for (let file of files) {
         let name = file.split(splitString)[1];
         let item = {
             name
