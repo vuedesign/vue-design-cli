@@ -10,9 +10,6 @@ class Init {
         this.template = new Template(options);
         this.templateConfig = this.template.config;
         this.templateName = this.options.templateName || this.templateConfig.current;
-        this.appPath = this.getAppPath(this.templateName);
-        this.appConfigFile = `${this.appPath}/config.json`;
-        this.appConfig = require(this.appConfigFile);
         // this.appPromptConfig = this.getAppPromptConfig();
     }
 
@@ -47,7 +44,12 @@ class Init {
     }
 
     async init(options = {}) {
-        await this.template.download();
+        if (this.templateConfig.list.length === 0) {
+            await this.template.download();
+        }
+        this.appPath = this.getAppPath(this.templateName);
+        this.appConfigFile = `${this.appPath}/config.json`;
+        this.appConfig = require(this.appConfigFile);
         const answers = await this.getAnswers();
         await this.copyDefaultTemplate(Object.assign({}, this.options, options, answers, {
             templateName: this.templateName,

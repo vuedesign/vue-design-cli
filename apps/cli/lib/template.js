@@ -64,9 +64,9 @@ class Template {
         }
     }
 
-    async download(baseTemplateUrl, isDefault) {
+    async download(templateUrl, isDefault) {
         const templatesPath = this.options.TEMPLATES_PATH;
-        const templateGitUrl = baseTemplateUrl || 'https://github.com/vuedesign/vued-template.git';
+        const templateGitUrl = templateUrl || 'https://github.com/vuedesign/vued-template.git';
         const templateName = (templateGitUrl.split('/').pop()).replace('.git', '');
         if (this.isTemplate(templateName)) {
             return false;

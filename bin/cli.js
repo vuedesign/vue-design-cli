@@ -43,7 +43,7 @@ program
         }
     });
 
-program.command('bt-add <base-template-url>')
+program.command('template-add <base-template-url>')
     .option('-d, --default', 'set default base template')
     .action((templateUrl, cmd) => {
         console.log('cmd', cmd.default);
@@ -57,7 +57,7 @@ program.command('bt-add <base-template-url>')
         }
     });
 
-program.command('bt-del <template-name>')
+program.command('template-del <template-name>')
     .action((templateName, cmd) => {
         if (templateName) {
             template.del({
@@ -68,14 +68,14 @@ program.command('bt-del <template-name>')
         }
     });
 
-program.command('bt-set')
+program.command('template-set')
     .action((cmd) => {
         template.set();
         // console.log('cmd', cmd);
     });
 
 program
-    .command('bt-map')
+    .command('template-map')
     .option('-w, --workspace [value]', 'set workspace path')
     .option('-p, --projectName [value]', 'set project name')
     .option('-m, --mapPath [value]', 'set map path')
