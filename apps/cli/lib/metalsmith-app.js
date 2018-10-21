@@ -3,11 +3,11 @@ const beautify = require('../../../global/utils/beautify');
 const fs = require('../../../global/utils/fs');
 
 module.exports = (options = {}) => {
-    const templateName = options.templateName || 'vued-template-base';
-    const templatePath = options.templatePath;
+    console.log('options: app:', options);
+    const { appPath, appName, templateName, templatePath, apps, pages } = options;
     const templateList = getTemplateFileList({
-        templateName,
-        templatePath
+        appPath,
+        appName
     });
     return (files, metalsmith, done) => {
         setImmediate(done);
@@ -32,7 +32,13 @@ module.exports = (options = {}) => {
                 });
             } else {
                 // 如果不在templateMap.json里的文件删
-                delete files[file];
+                if (file.indexOf('__templates__/apps') > -1 && apps) {
+
+                } else if (file.indexOf('__templates__/pages') > -1 && pages) {
+
+                } else {
+                    delete files[file];
+                }
             }
         });
     };
@@ -44,8 +50,8 @@ module.exports = (options = {}) => {
  * @returns {Array}
  */
 function getTemplateFileList(options = {}) {
-    const { templateName, templatePath } = options;
-    const templateMapData = require(`${templatePath}/${templateName}/templateMap.json`);
+    const { appPath, appName } = options;
+    const templateMapData = require(`${appPath}/${appName}/templateMap.json`);
     let templateFileList = [];
     parseMap(templateMapData, templateFileList, '');
     return templateFileList;
