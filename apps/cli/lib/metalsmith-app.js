@@ -3,18 +3,17 @@ const beautify = require('../../../global/utils/beautify');
 const fs = require('../../../global/utils/fs');
 
 module.exports = (options = {}) => {
-    console.log('options: app:', options);
     const { appPath, appName, templateName, templatePath, apps, pages } = options;
-    const templateList = getTemplateFileList({
+    const templateFileList = getTemplateFileList({
         appPath,
         appName
     });
     return (files, metalsmith, done) => {
         setImmediate(done);
         Object.keys(files).forEach(file => {
-            if (!(file.indexOf('.git/') > -1) && templateList.indexOf(file) > -1) {
+            if (!(file.indexOf('.git/') > -1) && templateFileList.indexOf(file) > -1) {
                 let data = files[file];
-                let filePath = `${templatePath}/${templateName}/files/${file}.js`;
+                const filePath = `${templatePath}/${templateName}/files/${file}.js`;
                 // 判断file是否存在
                 fs.access(filePath).then((access) => {
                     if (access) {
