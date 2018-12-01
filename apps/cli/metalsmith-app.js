@@ -1,6 +1,6 @@
 const path = require('path');
-const beautify = require('../../../global/utils/beautify');
-const fs = require('../../../global/utils/fs');
+const beautify = require('../../global/utils/beautify');
+const fs = require('../../global/utils/fs');
 
 module.exports = (options = {}) => {
     const { appPath, appName, templateName, templatePath, apps, pages } = options;

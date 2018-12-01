@@ -3,9 +3,11 @@
 const path = require('path');
 const colors = require('colors');
 const program = require('commander');
-const Init = require('../apps/cli/lib/init');
-const Template = require('../apps/cli/lib/template');
+const App = require('../apps/cli/App');
+const Template = require('../apps/cli/template');
 const buildTemplateMapJson = require('../global/tools/buildTemplateMapJson');
+const Mock = require('../apps/mock/Mock');
+const nodemon = require('nodemon');
 
 const options = {
     ROOT_PATH: path.join(__dirname, '..'),
@@ -13,16 +15,19 @@ const options = {
 };
 
 Object.assign(options, {
-    TEMPLATES_PATH: `${options.ROOT_PATH}/__templates__`
-})
+    TEMPLATES_PATH: `${options.ROOT_PATH}/__templates__`,
+    MOCK_DATA_PATH: `${options.CWD_PATH}/mock`
+});
 
-const init = new Init(options);
+const app = new App(options);
 const template = new Template(options);
+const mock = new Mock(options);
 
 program
     .version(require('../package').version)
     .usage('<command> [options]');
 
+// 初始化项目
 program
     .command('init <project-name>')
     .option('--apps', 'get default template/apps demo')
@@ -32,7 +37,7 @@ program
         if (projectName) {
             const { apps, pages } = cmd;
             (async() => {
-                init.init(Object.assign({}, options, {
+                app.init(Object.assign({}, options, {
                     projectName,
                     apps,
                     pages
@@ -43,10 +48,10 @@ program
         }
     });
 
+// 添加模板
 program.command('template-add <base-template-url>')
     .option('-d, --default', 'set default base template')
     .action((templateUrl, cmd) => {
-        console.log('cmd', cmd.default);
         if (templateUrl) {
             template.add({
                 templateUrl,
@@ -57,6 +62,7 @@ program.command('template-add <base-template-url>')
         }
     });
 
+// 删除模板
 program.command('template-del <template-name>')
     .action((templateName, cmd) => {
         if (templateName) {
@@ -68,12 +74,14 @@ program.command('template-del <template-name>')
         }
     });
 
+// 设置默认模板
 program.command('template-set')
     .action((cmd) => {
         template.set();
         // console.log('cmd', cmd);
     });
 
+// 生成模板文件map工具
 program
     .command('template-map')
     .option('-w, --workspace [value]', 'set workspace path')
@@ -88,6 +96,18 @@ program
             ignore: JSON.parse(cmd.ignore) || []
         };
         buildTemplateMapJson(config);
+    });
+
+// mock
+program.command('mock')
+    .action((cmd) => {
+        nodemon({
+            script: `${options.ROOT_PATH}/bin/cli-mock.js`
+        }).on('start', function () {
+            console.log('nodemon started');
+        }).on('crash', function () {
+            console.log('script crashed for some reason');
+        });
     });
 
 program.parse(process.argv);

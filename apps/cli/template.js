@@ -1,10 +1,10 @@
 const ora = require('ora');
 const colors = require('colors');
 const inquirer = require('inquirer');
-const fs = require('../../../global/utils/fs');
-const shell = require('../../../global/utils/shell');
-const beautify = require('../../../global/utils/beautify');
-const utils = require('../../../global/utils/utils');
+const fs = require('../../global/utils/fs');
+const shell = require('../../global/utils/shell');
+const beautify = require('../../global/utils/beautify');
+const utils = require('../../global/utils/utils');
 
 class Template {
     constructor(options = {}) {

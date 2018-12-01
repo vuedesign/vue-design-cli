@@ -4,7 +4,7 @@ const inquirer = require('inquirer');
 const app = require('./metalsmith-app');
 const Template = require('./template');
 
-class Init {
+class App {
     constructor(options = {}) {
         this.options = options;
         this.template = new Template(options);
@@ -80,4 +80,4 @@ class Init {
     }
 }
 
-module.exports = Init;
+module.exports = App;

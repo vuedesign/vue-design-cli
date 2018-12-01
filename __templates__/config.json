@@ -2,5 +2,8 @@
     "name": "templates",
     "version": "1.0.0",
     "current": "vued-template",
-    "list": []
+    "list": [{
+        "name": "vued-template",
+        "description": "project"
+    }]
 }
