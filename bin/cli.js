@@ -3,50 +3,48 @@
 const path = require('path');
 const colors = require('colors');
 const program = require('commander');
-const Init = require('../apps/cli/lib/init');
-const Template = require('../apps/cli/lib/template');
-const buildTemplateMapJson = require('../global/tools/buildTemplateMapJson');
+const nodemon = require('nodemon');
+const App = require('../apps/cli/app');
+const Template = require('../apps/cli/template');
+const Project = require('../apps/cli/project');
 
-const options = {
-    ROOT_PATH: path.join(__dirname, '..'),
-    CWD_PATH: process.cwd()
-};
+process.env.CLI_PATH = path.join(__dirname, '..');
+process.env.APP_PATH = process.cwd();
+process.env.APP_MOCK_PATH = path.join(process.cwd(), 'mock');
+process.env.CLI_TEMPLATES_PATH = path.join(__dirname, '..', '__templates__');
 
-Object.assign(options, {
-    TEMPLATES_PATH: `${options.ROOT_PATH}/__templates__`
-})
-
-const init = new Init(options);
-const template = new Template(options);
+const app = new App();
+const template = new Template();
+const project = new Project();
 
 program
     .version(require('../package').version)
     .usage('<command> [options]');
 
 program
+    .command('gui')
+    .description('run gui')
+    .action(async (cmd) => {
+        console.log('run gui');
+    });
+// 初始化项目
+program
     .command('init <project-name>')
-    .option('--apps', 'get default template/apps demo')
-    .option('--pages', 'get default template/pages demo')
     .description('init project')
     .action((projectName, cmd) => {
         if (projectName) {
-            const { apps, pages } = cmd;
             (async() => {
-                init.init(Object.assign({}, options, {
-                    projectName,
-                    apps,
-                    pages
-                }));
+                app.init({ projectName });
             })();
         } else {
             program.outputHelp(makeRed);
         }
     });
 
+// 添加模板
 program.command('template-add <base-template-url>')
     .option('-d, --default', 'set default base template')
     .action((templateUrl, cmd) => {
-        console.log('cmd', cmd.default);
         if (templateUrl) {
             template.add({
                 templateUrl,
@@ -57,6 +55,7 @@ program.command('template-add <base-template-url>')
         }
     });
 
+// 删除模板
 program.command('template-del <template-name>')
     .action((templateName, cmd) => {
         if (templateName) {
@@ -68,26 +67,23 @@ program.command('template-del <template-name>')
         }
     });
 
+// 设置默认模板
 program.command('template-set')
     .action((cmd) => {
         template.set();
         // console.log('cmd', cmd);
     });
 
-program
-    .command('template-map')
-    .option('-w, --workspace [value]', 'set workspace path')
-    .option('-p, --projectName [value]', 'set project name')
-    .option('-m, --mapPath [value]', 'set map path')
-    .option('-i, --ignore [value]', 'set ignore files')
+// mock
+program.command('mock')
     .action((cmd) => {
-        const config = {
-            workspace: cmd.workspace,
-            projectName: cmd.projectName,
-            mapPath: cmd.mapPath,
-            ignore: JSON.parse(cmd.ignore) || []
-        };
-        buildTemplateMapJson(config);
+        nodemon({
+            script: `${process.env.CLI_PATH}/bin/cli-mock.js`
+        }).on('start', function () {
+            console.log('nodemon started');
+        }).on('crash', function () {
+            console.log('script crashed for some reason');
+        });
     });
 
 program.parse(process.argv);
