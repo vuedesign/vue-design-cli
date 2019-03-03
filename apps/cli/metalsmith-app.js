@@ -3,17 +3,13 @@ const beautify = require('../../global/utils/beautify');
 const fs = require('../../global/utils/fs');
 
 module.exports = (options = {}) => {
-    const { appPath, appName, templateName, templatePath, apps, pages } = options;
-    const templateFileList = getTemplateFileList({
-        appPath,
-        appName
-    });
+    const { templateName, CLI_TEMPLATES_PATH, } = options;
     return (files, metalsmith, done) => {
         setImmediate(done);
         Object.keys(files).forEach(file => {
-            if (!(file.indexOf('.git/') > -1) && templateFileList.indexOf(file) > -1) {
+            if (path.dirname(file).indexOf('.git') === -1) {
                 let data = files[file];
-                const filePath = `${templatePath}/${templateName}/files/${file}.js`;
+                const filePath = path.join(CLI_TEMPLATES_PATH, templateName, 'files', `${file}.js`);
                 // 判断file是否存在
                 fs.access(filePath).then((access) => {
                     if (access) {
@@ -29,46 +25,13 @@ module.exports = (options = {}) => {
                         }
                     }
                 });
-            } else {
                 // 如果不在templateMap.json里的文件删
-                if (file.indexOf('__templates__/apps') > -1 && apps) {
-
-                } else if (file.indexOf('__templates__/pages') > -1 && pages) {
-
-                } else {
+                if (path.dirname(file).indexOf('__filters__') > -1) {
                     delete files[file];
                 }
+            } else {
+                delete files[file];
             }
         });
     };
 };
-
-/**
- * 获取文件列表
- * @param templateMapData
- * @returns {Array}
- */
-function getTemplateFileList(options = {}) {
-    const { appPath, appName } = options;
-    const templateMapData = require(`${appPath}/${appName}/templateMap.json`);
-    let templateFileList = [];
-    parseMap(templateMapData, templateFileList, '');
-    return templateFileList;
-}
-
-/**
- * 解析map为array
- * @param templateMapData
- * @param templateFileList
- * @param dir
- */
-function parseMap(templateMapData, templateFileList, dir) {
-    templateMapData.forEach(item => {
-        let file = dir ? `${dir}/${item.name}` : item.name;
-        if (item.children && item.children.length > 0) {
-            parseMap(item.children, templateFileList, file);
-        } else {
-            templateFileList.push(file);
-        }
-    });
-}

@@ -30,18 +30,11 @@ program
 // 初始化项目
 program
     .command('init <project-name>')
-    .option('--apps', 'get default template/apps demo')
-    .option('--pages', 'get default template/pages demo')
     .description('init project')
     .action((projectName, cmd) => {
         if (projectName) {
-            const { apps, pages } = cmd;
             (async() => {
-                app.init(Object.assign({}, {
-                    projectName,
-                    apps,
-                    pages
-                }));
+                app.init({ projectName });
             })();
         } else {
             program.outputHelp(makeRed);

@@ -1,3 +1,4 @@
+const path = require('path');
 const Metalsmith = require('metalsmith');
 const debug = require('metalsmith-debug');
 const inquirer = require('inquirer');
@@ -7,62 +8,50 @@ const Template = require('./template');
 class App {
     constructor() {
         this.options = {
-            CLI_TEMPLATES_PATH: process.env.CLI_TEMPLATES_PATH
+            CLI_TEMPLATES_PATH: process.env.CLI_TEMPLATES_PATH,
+            APP_PATH: process.env.APP_PATH
         };
         this.template = new Template();
         this.templateConfig = this.template.config;
-        this.templateName = this.options.templateName || this.templateConfig.current;
-        // this.appPromptConfig = this.getAppPromptConfig();
     }
 
-    getAppPath(templateName) {
-        const paths = [
-            this.options.CLI_TEMPLATES_PATH,
-            templateName,
-            '__templates__',
-            'apps'
-        ];
-        return paths.join('/');
+    getFilterPath(templateName) {
+        return path.join(this.options.CLI_TEMPLATES_PATH, templateName, '__filters__');
     }
 
     async getAnswers() {
         const config = [{
             type: 'list',
-            name: 'appName',
+            name: 'templateName',
             message: 'Please select template',
-            choices: this.appConfig.list,
-            default: this.appConfig.current
+            choices: this.templateConfig.list,
+            default: this.templateConfig.current
         }];
-        const { appName } = await inquirer.prompt(config);
-        const appPromptConfig = this.getAppPromptConfig(appName);
-        const answers = await inquirer.prompt(appPromptConfig);
+        const { templateName } = await inquirer.prompt(config);
+        const templatePromptConfig = this.getTemplatePromptConfig(templateName);
+        const answers = await inquirer.prompt(templatePromptConfig);
         return Object.assign({}, answers, {
-            appName
+            templateName
         });
     }
 
-    getAppPromptConfig(appName) {
-        return require(`${this.appPath}/${appName}/prompt.json`);
+    getTemplatePromptConfig(templateName) {
+        const filterPath = this.getFilterPath(templateName);
+        return require(path.join(filterPath, 'prompt.json'));
     }
 
     async init(options = {}) {
         if (this.templateConfig.list.length === 0) {
             await this.template.download();
         }
-        this.appPath = this.getAppPath(this.templateName);
-        this.appConfigFile = `${this.appPath}/config.json`;
-        this.appConfig = require(this.appConfigFile);
+        // this.filterPath = this.getFilterPath(this.templateName);
         const answers = await this.getAnswers();
-        await this.copyDefaultTemplate(Object.assign({}, this.options, options, answers, {
-            templateName: this.templateName,
-            templatePath: this.options.CLI_TEMPLATES_PATH,
-            appPath: this.appPath
-        }));
+        await this.copyDefaultTemplate(Object.assign({}, this.options, options, answers));
     }
 
     copyDefaultTemplate(options = {}) {
-        const srcDir = `../../../__templates__/${options.templateName}`;
-        const targetDir = `${options.CWD_PATH}/${options.projectName}`;
+        const srcDir = `../../__templates__/${ options.templateName }`;
+        const targetDir = path.join(this.options.APP_PATH, options.projectName);
         return new Promise((resolve, reject) => {
             Metalsmith(__dirname)
                 .source(srcDir)
