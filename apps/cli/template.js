@@ -7,9 +7,11 @@ const beautify = require('../../global/utils/beautify');
 const utils = require('../../global/utils/utils');
 
 class Template {
-    constructor(options = {}) {
-        this.options = options;
-        this.configFile = `${this.options.TEMPLATES_PATH}/config.json`;
+    constructor() {
+        this.options = {
+            CLI_TEMPLATES_PATH: process.env.CLI_TEMPLATES_PATH
+        };
+        this.configFile = `${this.options.CLI_TEMPLATES_PATH}/config.json`;
         this.config = this.getConfig(this.configFile);
     }
 
@@ -19,7 +21,7 @@ class Template {
 
     async del({ templateName }) {
         if (this.isTemplate(templateName)) {
-            await fs.del([`${this.options.TEMPLATES_PATH}/${templateName}/**`], {
+            await fs.del([`${this.options.CLI_TEMPLATES_PATH}/${templateName}/**`], {
                 force: true
             });
             let templateConfig = Object.assign({}, this.config);
@@ -65,7 +67,7 @@ class Template {
     }
 
     async download(templateUrl, isDefault) {
-        const templatesPath = this.options.TEMPLATES_PATH;
+        const templatesPath = this.options.CLI_TEMPLATES_PATH;
         const templateGitUrl = templateUrl || 'https://github.com/vuedesign/vued-template.git';
         const templateName = (templateGitUrl.split('/').pop()).replace('.git', '');
         if (this.isTemplate(templateName)) {

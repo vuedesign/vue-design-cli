@@ -3,30 +3,30 @@
 const path = require('path');
 const colors = require('colors');
 const program = require('commander');
-const App = require('../apps/cli/App');
-const Template = require('../apps/cli/template');
-const buildTemplateMapJson = require('../global/tools/buildTemplateMapJson');
-const Mock = require('../apps/mock/Mock');
 const nodemon = require('nodemon');
+const App = require('../apps/cli/app');
+const Template = require('../apps/cli/template');
+const Project = require('../apps/cli/project');
 
-const options = {
-    ROOT_PATH: path.join(__dirname, '..'),
-    CWD_PATH: process.cwd()
-};
+process.env.CLI_PATH = path.join(__dirname, '..');
+process.env.APP_PATH = process.cwd();
+process.env.APP_MOCK_PATH = path.join(process.cwd(), 'mock');
+process.env.CLI_TEMPLATES_PATH = path.join(__dirname, '..', '__templates__');
 
-Object.assign(options, {
-    TEMPLATES_PATH: `${options.ROOT_PATH}/__templates__`,
-    MOCK_DATA_PATH: `${options.CWD_PATH}/mock`
-});
-
-const app = new App(options);
-const template = new Template(options);
-const mock = new Mock(options);
+const app = new App();
+const template = new Template();
+const project = new Project();
 
 program
     .version(require('../package').version)
     .usage('<command> [options]');
 
+program
+    .command('gui')
+    .description('run gui')
+    .action(async (cmd) => {
+        console.log('run gui');
+    });
 // 初始化项目
 program
     .command('init <project-name>')
@@ -37,7 +37,7 @@ program
         if (projectName) {
             const { apps, pages } = cmd;
             (async() => {
-                app.init(Object.assign({}, options, {
+                app.init(Object.assign({}, {
                     projectName,
                     apps,
                     pages
@@ -81,28 +81,11 @@ program.command('template-set')
         // console.log('cmd', cmd);
     });
 
-// 生成模板文件map工具
-program
-    .command('template-map')
-    .option('-w, --workspace [value]', 'set workspace path')
-    .option('-p, --projectName [value]', 'set project name')
-    .option('-m, --mapPath [value]', 'set map path')
-    .option('-i, --ignore [value]', 'set ignore files')
-    .action((cmd) => {
-        const config = {
-            workspace: cmd.workspace,
-            projectName: cmd.projectName,
-            mapPath: cmd.mapPath,
-            ignore: JSON.parse(cmd.ignore) || []
-        };
-        buildTemplateMapJson(config);
-    });
-
 // mock
 program.command('mock')
     .action((cmd) => {
         nodemon({
-            script: `${options.ROOT_PATH}/bin/cli-mock.js`
+            script: `${process.env.CLI_PATH}/bin/cli-mock.js`
         }).on('start', function () {
             console.log('nodemon started');
         }).on('crash', function () {

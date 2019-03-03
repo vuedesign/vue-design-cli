@@ -5,9 +5,11 @@ const app = require('./metalsmith-app');
 const Template = require('./template');
 
 class App {
-    constructor(options = {}) {
-        this.options = options;
-        this.template = new Template(options);
+    constructor() {
+        this.options = {
+            CLI_TEMPLATES_PATH: process.env.CLI_TEMPLATES_PATH
+        };
+        this.template = new Template();
         this.templateConfig = this.template.config;
         this.templateName = this.options.templateName || this.templateConfig.current;
         // this.appPromptConfig = this.getAppPromptConfig();
@@ -15,7 +17,7 @@ class App {
 
     getAppPath(templateName) {
         const paths = [
-            this.options.TEMPLATES_PATH,
+            this.options.CLI_TEMPLATES_PATH,
             templateName,
             '__templates__',
             'apps'
@@ -53,7 +55,7 @@ class App {
         const answers = await this.getAnswers();
         await this.copyDefaultTemplate(Object.assign({}, this.options, options, answers, {
             templateName: this.templateName,
-            templatePath: this.options.TEMPLATES_PATH,
+            templatePath: this.options.CLI_TEMPLATES_PATH,
             appPath: this.appPath
         }));
     }
