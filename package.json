@@ -10,7 +10,7 @@
     "map": "vued bt-map -w /Users/wujian/Development/vue.design/vued-cli/templates -p vued-template -m /Users/wujian/Development/vue.design/vued-cli/apps/cli/templates/vued-template/base -i '[\".git\",\"mode_modules\"]'"
   },
   "bin": {
-    "vued": "./bin/cli.js"
+    "vued": "./bin"
   },
   "keywords": [
     "vued",

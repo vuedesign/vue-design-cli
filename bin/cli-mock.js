@@ -1,7 +1,16 @@
-const Mock = require('../apps/mock/Mock');
+const nodemon = require('nodemon');
+// mock
+module.exports = (program) => {
+    program.command('mock')
+    .action((cmd) => {
+        nodemon({
+            script: `${process.env.CLI_PATH}/bin/mock.js`
+        }).on('start', function () {
+            console.log('nodemon started');
+        }).on('crash', function () {
+            console.log('script crashed for some reason');
+        });
+    });
+};
 
-const mock = new Mock({
-    MOCK_DATA_PATH: `${process.cwd()}/mock`
-});
 
-mock.run();
