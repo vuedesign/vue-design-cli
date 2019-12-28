@@ -4,7 +4,7 @@ module.exports = (program) => {
     program.command('mock')
     .action((cmd) => {
         nodemon({
-            script: `${process.env.CLI_PATH}/bin/mock.js`
+            script: `${process.env.CLI_PATH}/apps/mock/index.js`
         }).on('start', function () {
             console.log('nodemon started');
         }).on('crash', function () {

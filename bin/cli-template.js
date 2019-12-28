@@ -1,3 +1,4 @@
+const consoleLog = require('../global/utils/consoleLog');
 const Template = require('../apps/cli/template');
 const template = new Template();
 
@@ -13,7 +14,7 @@ module.exports = (program) => {
                 isDefault: cmd.default
             });
         } else {
-            program.outputHelp(makeRed);
+            program.outputHelp(consoleLog.makeRed);
         }
     });
 
@@ -26,7 +27,7 @@ module.exports = (program) => {
                 templateName
             });
         } else {
-            program.outputHelp(makeRed);
+            program.outputHelp(consoleLog.makeRed);
         }
     });
 

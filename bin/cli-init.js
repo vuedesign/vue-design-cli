@@ -1,3 +1,4 @@
+const consoleLog = require('../global/utils/consoleLog');
 const App = require('../apps/cli/app');
 const app = new App();
 
@@ -9,11 +10,10 @@ module.exports = (program) => {
     .action((projectName, cmd) => {
         if (projectName) {
             (async() => {
-                app.init({ projectName });
+                await app.init({ projectName });
             })();
         } else {
-            program.outputHelp(makeRed);
+            program.outputHelp(consoleLog.makeRed);
         }
     });
 };
-
